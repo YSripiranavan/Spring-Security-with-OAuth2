@@ -1,7 +1,9 @@
 package com.sripiranavan.spring.security.multiple.providers.authentication.config;
 
+import com.sripiranavan.spring.security.multiple.providers.authentication.security.filters.OtpAuthenticationFilter;
 import com.sripiranavan.spring.security.multiple.providers.authentication.security.filters.UsernamePasswordAuthFilter;
 import com.sripiranavan.spring.security.multiple.providers.authentication.security.providers.OtpAuthenticationProvider;
+import com.sripiranavan.spring.security.multiple.providers.authentication.security.providers.TokenAuthProvider;
 import com.sripiranavan.spring.security.multiple.providers.authentication.security.providers.UsernamePasswordAuthProviders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -21,9 +23,14 @@ public class ProjectConfig extends WebSecurityConfigurerAdapter {
     private UsernamePasswordAuthProviders authProviders;
     @Autowired
     private OtpAuthenticationProvider otpAuthenticationProvider;
+    @Autowired
+    private TokenAuthProvider tokenAuthProvider;
 
     @Autowired
     private UsernamePasswordAuthFilter usernamePasswordAuthFilter;
+
+    @Autowired
+    private OtpAuthenticationFilter otpAuthenticationFilter;
 
     @Bean
     public PasswordEncoder passwordEncoder(){
@@ -32,12 +39,14 @@ public class ProjectConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.authenticationProvider(authProviders).authenticationProvider(otpAuthenticationProvider);
+        auth.authenticationProvider(authProviders).authenticationProvider(otpAuthenticationProvider)
+        .authenticationProvider(tokenAuthProvider);
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.addFilterAt(usernamePasswordAuthFilter, BasicAuthenticationFilter.class);
+        http.addFilterAt(usernamePasswordAuthFilter, BasicAuthenticationFilter.class)
+        .addFilterAfter(otpAuthenticationFilter,BasicAuthenticationFilter.class);
     }
 
     @Bean

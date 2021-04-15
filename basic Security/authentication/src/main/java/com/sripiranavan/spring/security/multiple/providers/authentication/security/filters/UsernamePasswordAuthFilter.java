@@ -4,6 +4,7 @@ import com.sripiranavan.spring.security.multiple.providers.authentication.entiti
 import com.sripiranavan.spring.security.multiple.providers.authentication.repository.OtpRepository;
 import com.sripiranavan.spring.security.multiple.providers.authentication.security.authentication.OtpAuthentication;
 import com.sripiranavan.spring.security.multiple.providers.authentication.security.authentication.UsernamePasswordAuthentication;
+import com.sripiranavan.spring.security.multiple.providers.authentication.security.managers.TokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
@@ -26,6 +27,8 @@ public class UsernamePasswordAuthFilter extends OncePerRequestFilter {
     private AuthenticationManager authenticationManager;
     @Autowired
     private OtpRepository otpRepository;
+    @Autowired
+    private TokenManager tokenManager;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
@@ -49,7 +52,9 @@ public class UsernamePasswordAuthFilter extends OncePerRequestFilter {
             Authentication a = new OtpAuthentication(username,otp);
             a = authenticationManager.authenticate(a);
 //            We issue a token
-            response.setHeader("Authorization", UUID.randomUUID().toString());
+            var token = UUID.randomUUID().toString();
+            tokenManager.add(token);
+            response.setHeader("Authorization", token);
         }
     }
 
