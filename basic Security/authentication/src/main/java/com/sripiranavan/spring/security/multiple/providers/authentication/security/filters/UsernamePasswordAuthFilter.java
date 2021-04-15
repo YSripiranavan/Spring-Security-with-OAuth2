@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.Random;
 import java.util.UUID;
 
-@Component
 public class UsernamePasswordAuthFilter extends OncePerRequestFilter {
 
     @Autowired

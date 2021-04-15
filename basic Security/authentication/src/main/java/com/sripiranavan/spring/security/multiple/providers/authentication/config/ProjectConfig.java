@@ -5,18 +5,22 @@ import com.sripiranavan.spring.security.multiple.providers.authentication.securi
 import com.sripiranavan.spring.security.multiple.providers.authentication.security.providers.OtpAuthenticationProvider;
 import com.sripiranavan.spring.security.multiple.providers.authentication.security.providers.TokenAuthProvider;
 import com.sripiranavan.spring.security.multiple.providers.authentication.security.providers.UsernamePasswordAuthProviders;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 @Configuration
+//@EnableAsync
 public class ProjectConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
@@ -26,11 +30,15 @@ public class ProjectConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private TokenAuthProvider tokenAuthProvider;
 
-    @Autowired
-    private UsernamePasswordAuthFilter usernamePasswordAuthFilter;
+    @Bean
+    public UsernamePasswordAuthFilter usernamePasswordAuthFilter(){
+        return new UsernamePasswordAuthFilter();
+    }
 
-    @Autowired
-    private OtpAuthenticationFilter otpAuthenticationFilter;
+    @Bean
+    public OtpAuthenticationFilter otpAuthenticationFilter(){
+        return new OtpAuthenticationFilter();
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder(){
@@ -45,8 +53,8 @@ public class ProjectConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.addFilterAt(usernamePasswordAuthFilter, BasicAuthenticationFilter.class)
-        .addFilterAfter(otpAuthenticationFilter,BasicAuthenticationFilter.class);
+        http.addFilterAt(usernamePasswordAuthFilter(), BasicAuthenticationFilter.class)
+        .addFilterAfter(otpAuthenticationFilter(),BasicAuthenticationFilter.class);
     }
 
     @Bean
@@ -54,4 +62,11 @@ public class ProjectConfig extends WebSecurityConfigurerAdapter {
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
     }
+
+//    @Bean
+//    public InitializingBean initializingBean(){
+//        return () -> {
+//            SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
+//        };
+//    }
 }
